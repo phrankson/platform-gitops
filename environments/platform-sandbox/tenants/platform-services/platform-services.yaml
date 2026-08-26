@@ -1,0 +1,46 @@
+# GitOps coordination file: tells Argo CD where to find the platform
+# services manifests. The actual Helm-rendered configs live separately, in
+# a platform-services repo, under environments/base/ and
+# environments/platform-sandbox/ there -- this file does not contain them.
+#
+# The book's version of this file is two Flux CRDs (GitRepository +
+# Kustomization). Argo CD folds both jobs -- "which repo/path" and "where
+# to deploy it" -- into a single Application CRD, so one resource replaces
+# both of the book's:
+#   GitRepository.spec.url        -> spec.source.repoURL
+#   GitRepository.spec.ref.branch -> spec.source.targetRevision
+#   Kustomization.spec.path       -> spec.source.path
+#   Kustomization.spec.prune      -> spec.syncPolicy.automated.prune
+#   Kustomization.spec.interval   -> Argo's own reconciliation loop (no
+#                                     per-Application interval field to set)
+#   Kustomization.spec.wait/timeout -> spec.syncPolicy.retry (closest analog;
+#                                     not a 1:1 mapping -- Argo tracks sync
+#                                     health rather than blocking on a timer)
+#
+# NOTE: the platform-services repo referenced below does not exist yet.
+# This file is a placeholder until that repo and its Helm configs are built.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-services
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/phrankson/platform-services.git
+    targetRevision: main
+    path: environments/platform-sandbox
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform-services
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        maxDuration: 3m
