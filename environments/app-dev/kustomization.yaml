@@ -1,0 +1,9 @@
+# Root Kustomization for the app-dev environment.
+# Argo CD's App of Apps points here (folder-based, not a branch -- this
+# repo has one branch, main; environments are separated by path).
+# Onboarding a new tenant = add their folder under tenants/ and list it below.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - tenants/platform-team

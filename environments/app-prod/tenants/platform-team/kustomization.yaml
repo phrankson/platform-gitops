@@ -1,0 +1,8 @@
+# platform-team's own tenant folder for the app-prod environment.
+# Dogfooding: the platform team's workloads go through this exact same
+# GitOps path as any other team's -- no special-casing.
+# Empty for now; resources land here as pieces come under GitOps.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources: []
