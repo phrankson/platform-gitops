@@ -1,0 +1,31 @@
+# GitOps coordination file for the app-prod environment -- see
+# environments/platform-sandbox/tenants/platform-services/platform-services.yaml
+# for the full Flux -> Argo CD translation notes. Same pattern, different
+# environment path.
+#
+# NOTE: the platform-services repo referenced below does not exist yet.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-services
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/phrankson/platform-services.git
+    targetRevision: main
+    path: environments/app-prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform-services
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        maxDuration: 3m

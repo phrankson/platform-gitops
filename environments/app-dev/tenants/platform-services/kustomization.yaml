@@ -1,0 +1,8 @@
+# platform-services tenant, app-dev environment.
+# Dogfooding: platform-owned services go through this exact same GitOps
+# path as any other tenant's workloads -- no special-casing.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - platform-services.yaml
