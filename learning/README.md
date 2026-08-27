@@ -12,6 +12,78 @@ set of instructions the hub checks continuously and acts on by itself.
 
 ---
 
+## First, what does "the hub checks continuously" actually mean?
+
+This is worth slowing down on, because it's the single most important idea
+in how this whole project works, and it's easy to read past it without
+really absorbing it.
+
+Picture a contractor who renovates a house once, checks their work, and
+leaves. That's how most deployments work without a tool like Argo CD:
+someone (or some CI pipeline) runs a command, it makes some changes, and
+then nobody is watching anymore. If a different contractor comes by later
+and swaps out a fixture, or something breaks on its own, nobody notices
+until a resident happens to complain.
+
+Argo CD is not that contractor. It's more like a live-in facilities person
+who was handed a copy of the house's blueprint (this repo) on day one, and
+who never stops walking the halls comparing what they see to what the
+blueprint says. Every few minutes, forever, for as long as the hub is
+running: walk through, compare, fix anything that doesn't match, walk
+through again. There is no "finished." The checking never stops.
+
+This explains a few things that would otherwise look strange:
+
+- If someone manually changes something in the house that this account's
+  instructions describe — swaps a fixture by hand, say — the hub quietly
+  puts it back, usually within a few minutes, without anyone asking it to.
+  This isn't a bug or the hub being stubborn; it's the whole point of
+  having a live-in facilities person instead of a one-time contractor.
+- "Sync status" is the answer to "does the house currently match the
+  blueprint?" "Health status" is a separate question: "is the house
+  actually livable right now, whether or not it matches the blueprint
+  exactly?" A house can be perfectly livable while still not matching the
+  blueprint down to the last detail — see the real, currently-running
+  example of exactly that in
+  [`platform-services`'s companion](../../platform-services/learning/service-mesh.md),
+  where two of the three Istio pieces show `OutOfSync` and `Healthy` at
+  the same time.
+- Nothing in this repo ever gets "deployed" in the sense of a single
+  command running once. A change here just edits the blueprint. The hub
+  finds the edit on its own next walkthrough and makes the house match it.
+
+## Then, which "environment" are we even talking about?
+
+`platform-core`'s companion already used the word "house" for one specific
+thing: an entire separate structure, built from scratch, with its own
+foundation and wiring — never a room inside a shared building. That's
+worth holding onto, because this repo reuses the same underlying idea
+under a different name, and then reuses it again a third time, and all
+three are correct simultaneously:
+
+- To `platform-core`, an environment is a whole separate house — a Kind
+  cluster, with nothing shared between it and any other house.
+- To this repo, an environment is a drawer in the filing cabinet — a
+  folder under `environments/`, holding instructions for exactly one
+  house and no other.
+- To anything Argo CD actually produces from those instructions, an
+  environment is a tag stapled to it — `env: platform-sandbox`, say — so
+  that if you ever looked at a pile of instructions from every house mixed
+  together, you could still tell at a glance which house each one belongs
+  to.
+
+None of these three is the "real" definition, with the others as loose
+shorthand for it. Each one is exactly the right tool for what its own
+layer needs: a builder needs a real, physical house to build; a filing
+system needs a drawer to organize paperwork by; a label needs to be small
+enough to staple to a single sheet. The habit worth building, every time
+you read "environment" anywhere in this project's docs, is asking which of
+the three is actually meant — the house, the drawer, or the tag. Once
+that's automatic, nothing about this repo's folder layout will feel
+inconsistent.
+
+---
+
 ## One filing cabinet, organized by house, then by resident
 
 This repo holds no application code. It's closer to a filing cabinet: a
