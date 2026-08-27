@@ -22,13 +22,21 @@ other things already do:
   repo's own `Application` objects point at in turn — the actual Helm
   charts, manifests, and policy that get applied to the cluster.
 
-So the chain runs: `platform-team-administration` creates the repos →
-`platform-core` builds the clusters and points Argo CD at this repo →
-`platform-gitops` fans that single pointer out into one `Application` per
-tenant → each tenant's own repo is where the real workload lives. This repo
-is the coordination layer in the middle — everything before it builds
-infrastructure, everything after it is a real workload, and this is the
-only place that says which workload goes where.
+```mermaid
+flowchart LR
+    A["platform-team-administration"] -->|"creates the repo,<br/>sets branch protection"| B["platform-gitops<br/>(this repo)"]
+    A -->|"creates the repo"| C["platform-core"]
+    C -->|"provisions the cluster,<br/>installs Argo CD,<br/>seed_gitops() points it at"| B
+    B -->|"fans out one Application<br/>object per tenant, pointing at"| D["platform-services<br/>(and future tenants)"]
+    C -.same cluster.-> D
+
+    style B fill:#2563eb,color:#fff,stroke:#1e3a8a
+```
+
+Everything to the left of this repo in the diagram builds infrastructure —
+repos, clusters, the Argo CD installation itself. Everything to the right is
+a real workload. This repo is the only thing in the middle, and the only
+place that says which workload goes where.
 
 ## Why folders instead of branches
 
