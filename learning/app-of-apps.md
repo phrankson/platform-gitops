@@ -146,8 +146,9 @@ platform-services   Synced        Healthy
 
 ## Where this leads next
 
-`platform-services.yaml` points at a repo this project hasn't covered yet.
-That repo is where the chain finally stops pointing at more files and
-starts actually installing something real — a service mesh, running Helm
-charts, on the cluster `platform-core` built. See `platform-services`'s
-own learning companion for that half of the story.
+`platform-services.yaml` points at one more repo. That repo is where the
+chain finally stops pointing at more files and starts actually installing
+something real — a service mesh, running Helm charts, on the cluster
+`platform-core` built. See
+[`platform-services`'s own learning companion](../../platform-services/learning/README.md)
+for that half of the story.
