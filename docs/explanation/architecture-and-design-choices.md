@@ -1,5 +1,35 @@
 # Architecture and design choices
 
+## What this repo is, and where it sits
+
+`platform-gitops` is the one repo Argo CD is actually paired to. It holds no
+application code, no Helm charts, and nothing that gets built or compiled —
+just Kustomize files that declare which tenants exist in which environment,
+and one Argo `Application` object per tenant pointing at the repo that
+actually contains that tenant's deployable payload.
+
+This repo doesn't create anything on its own. It only exists because three
+other things already do:
+
+- **`platform-team-administration`** created this repo (and its branch
+  protection) the same way it creates every repo this project manages.
+- **`platform-core`** provisions the Kubernetes clusters and installs Argo
+  CD onto them, then seeds one root `Application` object pointing at this
+  repo — specifically at `environments/<stack-name>`, using
+  `seed_gitops()`. That single call is the only place any cluster is ever
+  told this repo exists.
+- **`platform-services`** (and any future tenant's repo) is what this
+  repo's own `Application` objects point at in turn — the actual Helm
+  charts, manifests, and policy that get applied to the cluster.
+
+So the chain runs: `platform-team-administration` creates the repos →
+`platform-core` builds the clusters and points Argo CD at this repo →
+`platform-gitops` fans that single pointer out into one `Application` per
+tenant → each tenant's own repo is where the real workload lives. This repo
+is the coordination layer in the middle — everything before it builds
+infrastructure, everything after it is a real workload, and this is the
+only place that says which workload goes where.
+
 ## Why folders instead of branches
 
 A common alternative design gives each environment its own long-lived Git
